@@ -1,0 +1,87 @@
+# Copyright 2018 The Fuchsia Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/fuzz.gni")
+import("//build_overrides/pigweed.gni")
+import("$dir_pw_fuzzer/fuzzer.gni")
+import("$dir_pw_unit_test/test.gni")
+
+# Basic target with protocol definitions and no logic, suitable for test
+# emulation.
+pw_source_set("definitions") {
+  sources = [
+    "data_element.cc",
+    "data_element.h",
+    "error.cc",
+    "error.h",
+    "sdp.h",
+    "service_record.cc",
+    "service_record.h",
+  ]
+
+  public_deps = [ "//src/connectivity/bluetooth/core/bt-host/common" ]
+}
+
+pw_source_set("sdp") {
+  sources = [
+    "client.cc",
+    "client.h",
+    "pdu.cc",
+    "pdu.h",
+    "server.cc",
+    "server.h",
+    "service_discoverer.cc",
+    "service_discoverer.h",
+  ]
+
+  public_deps = [
+    ":definitions",
+    "$dir_pw_third_party/fuchsia:stdcompat",
+    "//src/connectivity/bluetooth/core/bt-host/l2cap",
+  ]
+}
+
+pw_test("tests") {
+  sources = [
+    "client_unittest.cc",
+    "data_element_unittest.cc",
+    "pdu_unittest.cc",
+    "server_unittest.cc",
+    "service_discoverer_unittest.cc",
+    "service_record_unittest.cc",
+  ]
+
+  deps = [
+    ":sdp",
+    "//src/connectivity/bluetooth/core/bt-host/common",
+    "//src/connectivity/bluetooth/core/bt-host/l2cap:testing",
+    "//src/connectivity/bluetooth/core/bt-host/testing",
+  ]
+}
+
+fuchsia_library_fuzzer("data_element_fuzzer") {
+  sources = [ "data_element_fuzztest.cc" ]
+  deps = [
+    ":definitions",
+    "//src/connectivity/bluetooth/core/bt-host/testing:fuzztest_driver",
+  ]
+}
+
+pw_fuzzer("pw_data_element_fuzzer") {
+  sources = [ "data_element_fuzztest.cc" ]
+  deps = [ ":definitions" ]
+}
+
+fuchsia_library_fuzzer("pdu_fuzzer") {
+  sources = [ "pdu_fuzztest.cc" ]
+  deps = [
+    ":sdp",
+    "//src/connectivity/bluetooth/core/bt-host/testing:fuzztest_driver",
+  ]
+}
+
+pw_fuzzer("pw_pdu_fuzzer") {
+  sources = [ "pdu_fuzztest.cc" ]
+  deps = [ ":sdp" ]
+}

@@ -1,0 +1,168 @@
+# Copyright 2017 The Fuchsia Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build_overrides/pigweed.gni")
+import("$dir_pw_unit_test/test.gni")
+
+pw_source_set("testing") {
+  testonly = true
+
+  sources = [
+    "controller_test.h",
+    "inspect.h",
+    "inspect_util.cc",
+    "inspect_util.h",
+    "parse_args.cc",
+    "parse_args.h",
+    "test_packets.cc",
+    "test_packets.h",
+  ]
+
+  deps = [ "$dir_pw_unit_test" ]
+
+  public_deps = [
+    ":fake_controller",
+    ":mock_controller",
+    ":test_helpers",
+    "//src/connectivity/bluetooth/core/bt-host/transport",
+    "//src/connectivity/bluetooth/core/bt-host/transport:testing",
+  ]
+
+  if (current_os == "fuchsia") {
+    public_deps += [ "//sdk/lib/inspect/testing/cpp" ]
+  }
+}
+
+# test_helpers is separate from :testing to fix dependency cycles.
+pw_source_set("test_helpers") {
+  testonly = true
+
+  sources = [ "test_helpers.h" ]
+
+  deps = [ "//src/connectivity/bluetooth/lib/cpp-string" ]
+
+  public_deps = [
+    "$dir_pw_unit_test",
+    "//src/connectivity/bluetooth/core/bt-host/common",
+  ]
+}
+
+pw_test("tests") {
+  sources = [
+    "fake_controller_unittest.cc",
+    "fake_dynamic_channel_unittest.cc",
+    "fake_l2cap_unittest.cc",
+    "fake_sdp_server_unittest.cc",
+    "fake_signaling_server_unittest.cc",
+    "inspect_util_unittest.cc",
+    "parse_args_unittest.cc",
+  ]
+
+  deps = [
+    ":testing",
+    "//src/connectivity/bluetooth/core/bt-host/l2cap:testing",
+  ]
+}
+
+pw_source_set("controller_test_double_base") {
+  testonly = true
+
+  sources = [
+    "controller_test_double_base.cc",
+    "controller_test_double_base.h",
+  ]
+
+  public_deps = [
+    "$dir_pw_bluetooth",
+    "$dir_pw_third_party/fuchsia:fit",
+    "//src/connectivity/bluetooth/core/bt-host/common",
+    "//src/connectivity/bluetooth/core/bt-host/hci",
+    "//third_party/pigweed:pw_async_heap_dispatcher",
+  ]
+}
+
+pw_source_set("mock_controller") {
+  testonly = true
+
+  sources = [
+    "mock_controller.cc",
+    "mock_controller.h",
+  ]
+
+  public_deps = [
+    ":controller_test_double_base",
+    ":test_helpers",
+    "$dir_pw_unit_test",
+    "//src/connectivity/bluetooth/core/bt-host/transport",
+    "//src/connectivity/bluetooth/core/bt-host/transport:testing",
+    "//third_party/pigweed:pw_async_heap_dispatcher",
+  ]
+}
+
+# Target that includes Fake HCI emulation support. This should NOT depend on
+# gtest.
+pw_source_set("fake_controller") {
+  testonly = true
+
+  sources = [
+    "fake_controller.cc",
+    "fake_controller.h",
+    "fake_dynamic_channel.cc",
+    "fake_dynamic_channel.h",
+    "fake_gatt_server.cc",
+    "fake_gatt_server.h",
+    "fake_l2cap.cc",
+    "fake_l2cap.h",
+    "fake_peer.cc",
+    "fake_peer.h",
+    "fake_sdp_server.cc",
+    "fake_sdp_server.h",
+    "fake_signaling_server.cc",
+    "fake_signaling_server.h",
+  ]
+
+  public_deps = [
+    ":controller_test_double_base",
+    ":test_helpers",
+    "$dir_pw_bluetooth:emboss_hci_group",
+    "$dir_pw_third_party/fuchsia:fit",
+    "//src/connectivity/bluetooth/core/bt-host/att:definitions",
+    "//src/connectivity/bluetooth/core/bt-host/common",
+    "//src/connectivity/bluetooth/core/bt-host/gap",
+    "//src/connectivity/bluetooth/core/bt-host/gatt:definitions",
+    "//src/connectivity/bluetooth/core/bt-host/hci",
+    "//src/connectivity/bluetooth/core/bt-host/l2cap:definitions",
+    "//src/connectivity/bluetooth/core/bt-host/l2cap:testing",
+    "//src/connectivity/bluetooth/core/bt-host/sdp",
+  ]
+}
+
+# Main entry point for host library unittests.
+pw_source_set("gtest_main") {
+  testonly = true
+
+  sources = [ "run_all_unittests.cc" ]
+
+  deps = [
+    ":testing",
+    "//src/connectivity/bluetooth/core/bt-host/common",
+  ]
+
+  public_deps = [ "$dir_pw_unit_test" ]
+}
+
+pw_source_set("fuzzing") {
+  testonly = true
+  sources = [ "peer_fuzzer.h" ]
+  deps = [ "//src/connectivity/bluetooth/core/bt-host/gap" ]
+}
+
+source_set("fuzztest_driver") {
+  testonly = true
+  sources = [ "fuzztest_driver.cc" ]
+  deps = [
+    "//src/connectivity/bluetooth/core/bt-host/common",
+    "//third_party/pigweed/backends/pw_log:printf",
+  ]
+}

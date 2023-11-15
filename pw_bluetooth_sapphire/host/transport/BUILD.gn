@@ -1,0 +1,79 @@
+# Copyright 2021 The Fuchsia Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build_overrides/pigweed.gni")
+import("$dir_pw_build/target_types.gni")
+import("$dir_pw_unit_test/test.gni")
+
+pw_source_set("transport") {
+  sources = [
+    "acl_data_channel.cc",
+    "acl_data_channel.h",
+    "acl_data_packet.cc",
+    "acl_data_packet.h",
+    "command_channel.cc",
+    "command_channel.h",
+    "control_packets.cc",
+    "control_packets.h",
+    "data_buffer_info.h",
+    "emboss_control_packets.cc",
+    "emboss_control_packets.h",
+    "emboss_packet.h",
+    "error.cc",
+    "error.h",
+    "link_type.cc",
+    "link_type.h",
+    "packet.h",
+    "sco_data_channel.cc",
+    "sco_data_channel.h",
+    "sco_data_packet.cc",
+    "sco_data_packet.h",
+    "slab_allocators.h",
+    "transport.cc",
+    "transport.h",
+  ]
+
+  public_deps = [
+    "$dir_pw_bluetooth",
+    "$dir_pw_bluetooth:emboss_hci_group",
+    "$dir_pw_bluetooth:emboss_hci_test",
+    "$dir_pw_third_party/fuchsia:fit",
+    "//src/connectivity/bluetooth/core/bt-host/common",
+    "//src/connectivity/bluetooth/core/bt-host/hci-spec",
+    "//third_party/pigweed:pw_async_dispatcher",
+    "//third_party/pigweed:pw_async_task",
+  ]
+}
+
+pw_source_set("testing") {
+  testonly = true
+
+  sources = [
+    "fake_sco_data_channel.cc",
+    "fake_sco_data_channel.h",
+    "mock_acl_data_channel.cc",
+    "mock_acl_data_channel.h",
+  ]
+
+  public_deps = [ ":transport" ]
+}
+
+pw_test("tests") {
+  sources = [
+    "acl_data_channel_unittest.cc",
+    "command_channel_unittest.cc",
+    "emboss_control_packets_unittest.cc",
+    "emboss_packet_unittest.cc",
+    "packet_unittest.cc",
+    "sco_data_channel_unittest.cc",
+    "sco_data_packet_unittest.cc",
+    "slab_allocators_unittest.cc",
+    "transport_unittest.cc",
+  ]
+
+  deps = [
+    ":transport",
+    "//src/connectivity/bluetooth/core/bt-host/testing",
+  ]
+}

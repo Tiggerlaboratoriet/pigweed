@@ -1,0 +1,95 @@
+# Copyright 2017 The Fuchsia Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build_overrides/pigweed.gni")
+import("$dir_pw_unit_test/test.gni")
+
+pw_source_set("hci") {
+  sources = [
+    "acl_connection.cc",
+    "acl_connection.h",
+    "advertising_handle_map.cc",
+    "advertising_report_parser.cc",
+    "advertising_report_parser.h",
+    "android_extended_low_energy_advertiser.cc",
+    "android_extended_low_energy_advertiser.h",
+    "bredr_connection.cc",
+    "bredr_connection.h",
+    "bredr_connection_request.cc",
+    "bredr_connection_request.h",
+    "command_handler.h",
+    "connection.cc",
+    "connection.h",
+    "extended_low_energy_advertiser.cc",
+    "extended_low_energy_advertiser.h",
+    "legacy_low_energy_advertiser.cc",
+    "legacy_low_energy_advertiser.h",
+    "legacy_low_energy_scanner.cc",
+    "legacy_low_energy_scanner.h",
+    "local_address_delegate.h",
+    "low_energy_advertiser.cc",
+    "low_energy_advertiser.h",
+    "low_energy_connection.cc",
+    "low_energy_connection.h",
+    "low_energy_connector.cc",
+    "low_energy_connector.h",
+    "low_energy_scanner.cc",
+    "low_energy_scanner.h",
+    "sco_connection.cc",
+    "sco_connection.h",
+    "sequential_command_runner.cc",
+    "sequential_command_runner.h",
+    "util.cc",
+    "util.h",
+  ]
+
+  public_deps = [
+    "$dir_pw_bluetooth:emboss_hci_group",
+    "$dir_pw_third_party/fuchsia:fit",
+    "//src/connectivity/bluetooth/core/bt-host/transport",
+    "//third_party/pigweed:pw_async_heap_dispatcher",
+  ]
+}
+
+pw_source_set("testing") {
+  testonly = true
+
+  sources = [
+    "fake_bredr_connection.cc",
+    "fake_bredr_connection.h",
+    "fake_local_address_delegate.cc",
+    "fake_local_address_delegate.h",
+    "fake_low_energy_connection.cc",
+    "fake_low_energy_connection.h",
+    "fake_sco_connection.cc",
+    "fake_sco_connection.h",
+  ]
+
+  deps = [ "//third_party/pigweed:pw_async_heap_dispatcher" ]
+
+  public_deps = [ ":hci" ]
+}
+
+pw_test("tests") {
+  sources = [
+    "advertising_handle_map_unittest.cc",
+    "advertising_report_parser_unittest.cc",
+    "command_handler_unittest.cc",
+    "connection_unittest.cc",
+    "extended_low_energy_advertiser_unittest.cc",
+    "legacy_low_energy_advertiser_unittest.cc",
+    "legacy_low_energy_scanner_unittest.cc",
+    "low_energy_advertiser_unittest.cc",
+    "low_energy_connector_unittest.cc",
+    "low_energy_multiple_advertising_unittest.cc",
+    "sequential_command_runner_unittest.cc",
+    "util_unittest.cc",
+  ]
+
+  deps = [
+    ":testing",
+    "$dir_pw_bluetooth:emboss_hci_test",
+    "//src/connectivity/bluetooth/core/bt-host/testing",
+  ]
+}
